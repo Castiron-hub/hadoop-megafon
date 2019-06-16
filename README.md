@@ -1,2 +1,2 @@
-# Hadoop-MF
-Hadoop proficiency course
+# Hadoop MF
+
