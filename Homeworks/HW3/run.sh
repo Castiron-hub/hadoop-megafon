@@ -1,20 +1,34 @@
+
 #!/usr/bin/env bash
 set -x
 
 HADOOP_STREAMING_JAR="/opt/cloudera/parcels/CDH/lib/hadoop-mapreduce/hadoop-streaming.jar"
-HDFS_OUTPUT_DIR=h3_mr_data
+HDFS_OUTPUT_DIR=hw3_mr_advanced_output
 
-hdfs dfs -rm -r -skipTrash $HDFS_OUTPUT_DIR
+hdfs dfs -rm -r -skipTrash $HDFS_OUTPUT_DIR > /dev/null;
+hdfs dfs -rm -r -skipTrash ${HDFS_OUTPUT_DIR}_tmp > /dev/null;
 
-yarn jar $HADOOP_STREAMING_JAR \
-        -files mapper.py,combiner.py,reducer.py \
-        -mapper 'python3 mapper.py' \
+(yarn jar $HADOOP_STREAMING_JAR \
+        -files mapper_regex.py,reducer.py \
+        -mapper 'python3 mapper_regex.py' \
         -reducer 'python3 reducer.py' \
-        -combiner 'python3 combiner.py' \
+        -numReduceTasks 10 \
         -input /data/stackexchange/posts \
-        -output $HDFS_OUTPUT_DIR
+        -output ${HDFS_OUTPUT_DIR}_tmp > /dev/null&&
+yarn jar $HADOOP_STREAMING_JAR \
+        -D mapreduce.job.output.key.comparator.class=org.apache.hadoop.mapreduce.lib.partition.KeyFieldBasedComparator \
+        -D mapreduce.partition.keypartitioner.options=-k1,1 \
+        -D mapreduce.partition.keycomparator.options='-k1,1 -k3,3nr' \
+        -D stream.num.map.output.key.fields=3 \
+        -files top_tags.py \
+        -mapper cat \
+        -reducer 'python3 top_tags.py' \
+        -numReduceTasks 1 \
+        -input ${HDFS_OUTPUT_DIR}_tmp \
+        -output ${HDFS_OUTPUT_DIR} \
+        -partitioner org.apache.hadoop.mapred.lib.KeyFieldBasedPartitioner > /dev/null)
 
-hdfs dfs -cat $HDFS_OUTPUT_DIR/*  | head -n 50
-hdfs dfs -cat $HDFS_OUTPUT_DIR/*  | head -n 50 > hw2_mr_data_ids.out
+hdfs dfs -cat $HDFS_OUTPUT_DIR/part-00000
+hdfs dfs -rm -r -skipTrash ${HDFS_OUTPUT_DIR}_tmp > /dev/null;
 
 echo $?

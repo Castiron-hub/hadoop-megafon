@@ -20,4 +20,4 @@ for line in sys.stdin:
             #выделяем год из даты
             year = creationdate[0].split('T')[0].split('-')[0]
             for tag in clean_tags:
-                print(year, '\t', tag, '\t', 1)
+                print(year+tag, '\t', 1)
