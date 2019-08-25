@@ -1,0 +1,13 @@
+sqoop import \
+ --connect "jdbc:mysql://virtual-client:3306/moon_db" \
+ --username sqoop \
+ --password sqoop \
+ --query "SELECT p.names, count(*) AS cards_count FROM person p LEFT JOIN person_details pd ON pd.person_id = p.id WHERE \$CONDITIONS GROUP BY p.id, p.names ORDER BY cards_count DESC" \
+ --target-dir /user/mf_goryacheva/person_details_$(date +%Y%m%d%H%M) \
+ --num-mappers 1 \
+ --hive-import \
+ --null-string '\\N' \
+ --null-non-string '\\N' \
+ --hive-overwrite \
+ --hive-table sqoop_db.person_sql_query_gas \
+ --hive-drop-import-delims

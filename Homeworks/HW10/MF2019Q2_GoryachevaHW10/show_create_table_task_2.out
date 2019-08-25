@@ -1,0 +1,23 @@
+CREATE TABLE `sqoop_db.person_sql_query_gas`(
+  `names` string, 
+  `cards_count` bigint)
+COMMENT 'Imported by sqoop on 2019/08/24 09:25:47'
+ROW FORMAT SERDE 
+  'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe' 
+WITH SERDEPROPERTIES ( 
+  'field.delim'='\u0001', 
+  'line.delim'='\n', 
+  'serialization.format'='\u0001') 
+STORED AS INPUTFORMAT 
+  'org.apache.hadoop.mapred.TextInputFormat' 
+OUTPUTFORMAT 
+  'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
+LOCATION
+  'hdfs://virtual-master.bigdatateam.ru:8020/user/hive/warehouse/sqoop_db.db/person_sql_query_gas'
+TBLPROPERTIES (
+  'COLUMN_STATS_ACCURATE'='true', 
+  'numFiles'='1', 
+  'numRows'='0', 
+  'rawDataSize'='0', 
+  'totalSize'='1606', 
+  'transient_lastDdlTime'='1566638751')
